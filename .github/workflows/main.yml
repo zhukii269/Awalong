@@ -1,18 +1,18 @@
 name: Deploy to GitHub Pages
 on:
   push:
-    branches: [ main ]  # 仅在 main 分支有代码推送时触发
+    branches: [ main ]  # 仅在main分支推送代码时触发
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # 使用 GitHub 提供的 Ubuntu 服务器
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4  # 拉取仓库代码
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'  # 选择 Node.js 版本（与你项目保持一致）
-      - run: npm install  # 安装项目依赖
-      - run: npm run build  # 执行 Vite 构建命令（生成 dist 文件夹）
+          node-version: '18'  # 匹配你项目的Node.js版本
+      - run: npm install  # 安装依赖
+      - run: npm run build  # 执行Vite构建
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist  # 指定要部署的文件夹（Vite 构建后默认输出到 dist）
+          publish_dir: ./dist  # Vite默认构建输出目录
