@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'  // 必须引入React插件
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],  // 启用React插件
-  base: './',         // 关键：设置相对路径，确保部署后资源能加载
+  base: './',
+  plugins: [react()],
+  server: {
+    host: true
+  }
 })
