@@ -42,6 +42,17 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomCode, playerId, serverUrl]);
 
+  // Resolve server URL at runtime: env -> server.json -> localStorage
+  useEffect(() => {
+    if (serverUrl) return;
+    fetch('/server.json').then((r) => r.json()).then((j) => {
+      if (j && j.url) {
+        localStorage.setItem('avalon_server_url', j.url);
+        location.reload();
+      }
+    }).catch(() => {});
+  }, [serverUrl]);
+
   // Auto restore
   useEffect(() => {
     const saved = localStorage.getItem('avalon_session');
