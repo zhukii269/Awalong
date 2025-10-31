@@ -51,7 +51,6 @@ export function App() {
         setRoomCode(s.roomCode || '');
         setPlayerId(s.playerId || '');
         setIsHost(!!s.isHost);
-        if (s.serverUrl) setServerUrl(s.serverUrl);
       } catch {}
     }
   }, []);
