@@ -5,6 +5,9 @@ import HostDashboard from './components/HostDashboard.jsx'
 import Assassination from './components/Assassination.jsx'
 import HistoryPanel from './components/HistoryPanel.jsx'
 import { initialConfig } from './game/roles.js'
+import RoomLobby from './components/RoomLobby.jsx'
+import TTS from './components/TTS.jsx'
+import RoomGame from './components/RoomGame.jsx'
 import DataIO from './components/DataIO.jsx'
 
 const STORAGE_KEY = 'avalon_host_v1'
@@ -90,6 +93,13 @@ export default function App() {
         )}
 
         <div className="divider"></div>
+        <RoomLobby />
+        {new URLSearchParams(location.search).get('r') && (
+          <div className="section">
+            <RoomGame roomId={new URLSearchParams(location.search).get('r')} />
+          </div>
+        )}
+        <div className="section"><TTS /></div>
         <HistoryPanel state={state} />
         <div className="row">
           <button className="btn" onClick={() => setState(s => ({...s, phase: 'setup'}))}>返回设置</button>
