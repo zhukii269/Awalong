@@ -19,5 +19,19 @@
 - vite.config.js 设置了 base: './'，确保 Pages 子路径下资源引用正常。
 - 已包含 PWA manifest 与 Service Worker，可添加到主屏幕并在离线有基础可用能力。
 
+多人联机（实验）
+- 需要一个 Firebase 项目，并在 Realtime Database 开启读写规则（开发期可设为 true）。
+- 在仓库根创建 `.env`，填入：
+```
+VITE_FB_API_KEY=xxxx
+VITE_FB_AUTH_DOMAIN=xxxx.firebaseapp.com
+VITE_FB_DB_URL=https://xxxx-default-rtdb.firebaseio.com
+VITE_FB_PROJECT_ID=xxxx
+VITE_FB_STORAGE=xxxx.appspot.com
+VITE_FB_MSG=...
+VITE_FB_APP_ID=1:...:web:...
+```
+- 部署后：房主在“在线房间”创建房间，分享链接 `?r=房间码` 给玩家；玩家打开链接并加入，房主点击开始。
+
 
 
