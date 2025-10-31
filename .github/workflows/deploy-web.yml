@@ -35,10 +35,15 @@ jobs:
         run: |
           npm run build
 
+      - name: List build output
+        run: |
+          ls -la ${{ github.workspace }}/web
+          ls -la ${{ github.workspace }}/web/dist || true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web/dist
+          path: ${{ github.workspace }}/web/dist
 
   deploy:
     needs: build
