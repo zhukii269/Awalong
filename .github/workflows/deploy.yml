@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (web/)
 
 on:
   push:
@@ -19,25 +19,26 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Install
+          node-version: 18
+      - name: Install (root workspaces)
         run: npm install
-      - name: Preflight check
+      - name: Preflight check (web)
         run: |
-          echo "Workspace layout:" && ls -lah && echo "\nTree (top-level):" && ls -lah .
-          echo "\nCheck required files:" \
-          && test -f index.html || (echo "Missing index.html" && exit 1) \
-          && test -f vite.config.js || (echo "Missing vite.config.js" && exit 1) \
-          && test -f package.json || (echo "Missing package.json" && exit 1) 
-          echo "\nCheck src entry:"
-          test -f src/main.jsx || (echo "Missing src/main.jsx. Please upload the entire src directory." && exit 1)
-          echo "OK: src/main.jsx found"
-      - name: Build
+          echo "Root layout:" && ls -lah
+          echo "\nCheck web folder:" && ls -lah web
+          test -f web/package.json || (echo "Missing web/package.json" && exit 1)
+          test -f web/index.html || (echo "Missing web/index.html" && exit 1)
+          test -f web/vite.config.ts || (echo "Missing web/vite.config.ts" && exit 1)
+          test -f web/src/main.tsx || (echo "Missing web/src/main.tsx" && exit 1)
+      - name: Build web
+        working-directory: web
+        env:
+          VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
         run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: web/dist
 
   deploy:
     needs: build
