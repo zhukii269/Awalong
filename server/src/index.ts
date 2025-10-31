@@ -192,7 +192,7 @@ io.on('connection', (socket) => {
     room.rejectsInRow = 0;
     // role assignment and game state init
     const modeConfig: ModeConfig = {
-      includeMordred: room.mode !== 'classic' && room.mode !== 'custom' ? true : room.mode === 'mordred',
+      includeMordred: room.mode === 'mordred',
       includeMorgana: true,
       includePercival: true,
       includeOberon: false
