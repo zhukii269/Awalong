@@ -23,7 +23,7 @@ export function App() {
   const [ready, setReady] = useState(false);
   const [chat, setChat] = useState<string>('');
   const [messages, setMessages] = useState<Array<{ at: number; nickname: string; message: string }>>([]);
-  const [serverUrl, setServerUrl] = useState<string>(SERVER_URL);
+  const [serverUrl] = useState<string>(SERVER_URL);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -138,37 +138,83 @@ export function App() {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: 16, color: '#f5e6c8', background: 'linear-gradient(180deg, #0b0a0a, #171311)', minHeight: '100vh', fontFamily: 'Cinzel, ui-serif, Georgia, serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>卡美洛特：Avalon Online</h2>
-        <div style={{ fontFamily: 'ui-sans-serif', fontSize: 12, color: '#c8b68a' }}>服务器：
-          <input value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} placeholder="https://你的服务器" style={{ marginLeft: 8, width: 280 }} />
+    <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24, color: '#f5e6c8', background: `#0b0a0a url(/images/bg-camelot.jpg) center/cover no-repeat fixed`, minHeight: '100vh', fontFamily: 'Cinzel, ui-serif, Georgia, serif', backdropFilter: 'blur(1px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'inline-block', padding: '6px 14px', border: '1px solid #c9a14a', background: 'rgba(20,16,10,0.7)', boxShadow: '0 0 12px rgba(201,161,74,0.3)' }}>
+          <h1 style={{ margin: 0, color: '#c9a14a', letterSpacing: 1 }}>卡美洛特：Avalon Online</h1>
         </div>
       </div>
       {!!error && <div style={{ background: '#5b1a1a', color: '#ffe3e3', padding: 8, borderRadius: 8, marginBottom: 12 }}>{error}</div>}
       {!roomCode || !playerId ? (
-        <div style={{ display: 'grid', gap: 12 }}>
-          <div>
-            <label>昵称</label>
-            <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="例如：兰斯洛特" />
-          </div>
-          <div>
-            <label>头像（可选）</label>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://... 或上传" />
-              <input type="file" accept="image/*" onChange={(e) => e.target.files && onPickAvatar(e.target.files[0])} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 40px 1fr', alignItems: 'start', gap: 16 }}>
+          {/* 创建房间 */}
+          <div style={{ background: 'rgba(20,16,10,0.78)', border: '1px solid #6b5b3e', padding: 16, borderRadius: 10, boxShadow: '0 0 16px rgba(0,0,0,0.4)' }}>
+            <h3 style={{ marginTop: 0, color: '#c9a14a' }}>创建房间</h3>
+            {!!error && (
+              <div style={{ background: '#5b1a1a', color: '#ffe3e3', padding: 8, borderRadius: 8, marginBottom: 8 }}>⚠️ {error}</div>
+            )}
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 12, color: '#c8b68a', marginBottom: 4 }}>昵称</div>
+                <div style={{ background: '#f0e6d2', border: '2px solid #6b5b3e', padding: '6px 8px', borderRadius: 8 }}>
+                  <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="例如：兰斯洛特" style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#111' }} />
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: '#c8b68a', marginBottom: 4 }}>头像（可选）</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', border: '2px solid #6b5b3e', background: '#222' }}>
+                    {avatarUrl ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <img src="/icons/helmet.svg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  </div>
+                  <div style={{ display: 'grid', gap: 6 }}>
+                    <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." style={{ width: 220 }} />
+                    <label style={{ display: 'inline-block', padding: '6px 10px', border: '1px solid #c9a14a', background: '#8b5a2b', color: '#fff', borderRadius: 8, cursor: 'pointer' }}>
+                      上传<input type="file" accept="image/*" onChange={(e) => e.target.files && onPickAvatar(e.target.files[0])} style={{ display: 'none' }} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <button onClick={handleCreate} disabled={loading} style={{
+                  color: '#fff', border: '1px solid #d4b483', background: 'linear-gradient(#8b5a2b,#5e3e1d)', padding: '12px 18px', cursor: 'pointer',
+                  clipPath: 'polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%)'
+                }}>
+                  {loading ? '创建中…' : '创建房间'}
+                </button>
+              </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button onClick={handleCreate} style={{ background: '#8b5a2b', border: '1px solid #d4b483', color: '#fff', padding: '8px 12px', borderRadius: 6 }} disabled={loading}>
-              {loading ? '创建中…' : '创建房间'}
-            </button>
-            <span>或</span>
-            <input value={roomCode} onChange={(e) => setRoomCode(e.target.value.toUpperCase())} placeholder="房间号" />
-            <input value={roomPassword} onChange={(e) => setRoomPassword(e.target.value)} placeholder="密码（可选）" />
-            <button onClick={handleJoin} style={{ background: '#3a5f0b', border: '1px solid #a3d977', color: '#fff', padding: '8px 12px', borderRadius: 6 }} disabled={loading}>
-              加入房间
-            </button>
+
+          {/* 中间分隔徽章 */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <img src="/icons/separator-emblem.svg" alt="emblem" style={{ width: 40, opacity: 0.8 }} />
+          </div>
+
+          {/* 加入房间 */}
+          <div style={{ background: 'rgba(20,16,10,0.78)', border: '1px solid #6b5b3e', padding: 16, borderRadius: 10, boxShadow: '0 0 16px rgba(0,0,0,0.4)' }}>
+            <h3 style={{ marginTop: 0, color: '#c9a14a' }}>加入房间</h3>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 12, color: '#c8b68a', marginBottom: 4 }}>房间号</div>
+                <div style={{ background: '#f0e6d2', border: '2px solid #6b5b3e', padding: '6px 8px', borderRadius: 8 }}>
+                  <input value={roomCode} onChange={(e) => setRoomCode(e.target.value.toUpperCase())} placeholder="例如：ABCD12" style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#111' }} />
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: '#c8b68a', marginBottom: 4 }}>密码（可选）</div>
+                <div style={{ background: '#f0e6d2', border: '2px solid #6b5b3e', padding: '6px 8px', borderRadius: 8 }}>
+                  <input value={roomPassword} onChange={(e) => setRoomPassword(e.target.value)} placeholder="如果房间设置了密码" style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#111' }} />
+                </div>
+              </div>
+              <div>
+                <button onClick={handleJoin} disabled={loading} style={{
+                  color: '#fff', border: '1px solid #a3d977', background: 'linear-gradient(#3a5f0b,#254205)', padding: '12px 18px', cursor: 'pointer',
+                  clipPath: 'polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%)'
+                }}>
+                  加入房间
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
