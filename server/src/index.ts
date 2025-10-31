@@ -3,6 +3,7 @@ import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import { nanoid } from 'nanoid';
+import multer from 'multer';
 import { createInitialGameState } from './game/state.js';
 import type { GameState, ModeConfig } from './game/types.js';
 
@@ -32,6 +33,7 @@ type Room = {
 const app = express();
 app.use(cors());
 app.use(express.json());
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } });
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -43,6 +45,7 @@ const io = new Server(server, {
 // In-memory store (replace with DB/Redis later)
 const rooms: Map<string, Room> = new Map();
 const gameStates: Map<string, GameState> = new Map();
+const avatarStore = new Map<string, { buf: Buffer; mime: string }>();
 
 function generateRoomCode(): string {
   // 6-char alpha
@@ -51,6 +54,21 @@ function generateRoomCode(): string {
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+app.post('/upload/avatar', upload.single('avatar'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'no file' });
+  const id = nanoid();
+  avatarStore.set(id, { buf: req.file.buffer, mime: req.file.mimetype || 'image/png' });
+  res.json({ url: `/avatar/${id}` });
+});
+
+app.get('/avatar/:id', (req, res) => {
+  const item = avatarStore.get(req.params.id);
+  if (!item) return res.status(404).end();
+  res.setHeader('Content-Type', item.mime);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(item.buf);
 });
 
 app.post('/rooms', (req, res) => {
@@ -233,6 +251,19 @@ io.on('connection', (socket) => {
     // For now just emit lobby state
     // If room becomes empty, schedule deletion
     emitLobbyState(room);
+    // If room has no connected sockets, schedule cleanup
+    const anyConnected = Array.from(room.players.values()).some((p) => p.id);
+    if (!anyConnected) {
+      setTimeout(() => {
+        const r = rooms.get(ctx.code);
+        if (!r) return;
+        const stillConnected = Array.from(r.players.values()).some((p) => p.id);
+        if (!stillConnected && !r.inGame) {
+          rooms.delete(ctx.code);
+          gameStates.delete(ctx.code);
+        }
+      }, 30 * 60 * 1000); // 30 minutes
+    }
   });
 });
 
